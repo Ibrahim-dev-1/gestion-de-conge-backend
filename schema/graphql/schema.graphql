@@ -1,0 +1,336 @@
+
+const { buildSchema } = require('graphql');
+
+const Schema = buildSchema(`
+
+# ----------------------- Agent Type -----------------------------------------------#
+type Agent{
+    Id: ID!
+    nom: String!
+    prenom: String!
+    email: String!
+    fonction: String!
+    situationMatrimoniale: String!
+    sexe: String!
+    telephone: String!
+    dateNaissance: String!
+    dateEmbauche: String!
+    status: Status!
+    calendrier: Calendrier
+    compte: Compte
+    division: Division
+    autorisationAbsences: [AutorisationAbsence]!
+    conges: [Conge]!
+    createdAt: String!
+    updatedAt: String!
+}
+input AgentInput{
+    nom: String!
+    prenom: String!
+    email: String!
+    fonction: String!
+    situationMatrimoniale: String!
+    sexe: String!
+    telephone: String!
+    dateNaissance: String!
+    dateEmbauche: String!
+    statusId: ID!
+    divisionId: ID!
+}
+
+# ----------------------- Division Type -----------------------------------------------#
+type Division{
+    Id: ID!
+    nom: String!
+    agents: [Agent]!
+    createdAt: String!
+    updatedAt: String!
+}
+input DivisionInput{
+    nom: String!
+}
+
+# ----------------------- Calendrier Type -----------------------------------------------#
+type Calendrier{
+    Id: ID!
+    dateDebut: String!
+    dateFin: String!
+    nbrJr: Int!
+    createdAt: String!
+    updatedAt: String!
+}
+input CalendrierInput{
+    dateDebut: String!
+    dateFin: String!
+}
+
+# ----------------------------  typeConge Type   ------------------------------------------#
+type TypeConge{
+    Id: ID!
+    nom: String!
+    nbrJrMax: Int!
+    conges: [Conge]!
+    createdAt: String!
+    updatedAt: String! 
+}
+
+input TypeCongeInput{
+    nom:String!
+    nbrJrMax: Int!
+}
+
+# ----------------------------  conge Type   ------------------------------------------#
+type Conge{
+    Id: ID!
+    dateDebut: String!
+    dateFin: String!
+    commentaire: String!
+    typeConge: TypeConge!
+    agent: Agent!
+    createdAt: String!
+    updatedAt: String! 
+}
+
+input CongeInput{
+    dateDebut: String!
+    dateFin: String!
+    commentaire: String
+    agentId: ID!
+    typeCongeId: ID!
+}
+
+# ----------------------------  Compte Type   ------------------------------------------#
+type Compte{
+    Id: ID!
+    email: String!
+    isCountLock: Boolean!
+    password: String!
+    agent: Agent!
+    createdAt: String!
+    updatedAt: String! 
+}
+
+input CompteInput{
+    email: String!
+    isCountLock: Boolean!
+    password: String!
+    agentId: ID!
+}
+
+# ----------------------------  AutorisationAbsence Type   ------------------------------------------#
+type AutorisationAbsence {
+    Id: ID!
+    dateDebut: String!
+    dateFin: String!
+    commentaire: String!
+    typeAbsence: TypeAbsence!
+    agent: Agent!
+    createdAt: String!
+    updatedAt: String!
+}
+
+input AutorisationAbsenceInput{
+    dateDebut: String!
+    dateFin: String!
+    commentaire: String
+    typeAbsenceId: ID
+    agentId: ID!
+}
+
+# ----------------------------  TypeAbsence Type   ------------------------------------------#
+type TypeAbsence{
+    Id: ID!
+    nom: String!
+    nbrJrMax: Int!
+    conges: [Conge]
+    createdAt: String!
+    updatedAt: String!
+}
+
+input TypeAbsenceInput{
+    nom: String!
+    nbrJrMax: Int!
+}
+
+# ----------------------------  Status Type   ------------------------------------------#
+type Status{
+    Id: ID!
+    grade: String!
+    agents: [Agent]!
+    createdAt: String!
+    updatedAt: String!
+}
+# ----------------------------  JourFerier Type   ------------------------------------------#
+type JourFerier{
+    Id: ID!
+    date: String!
+    agents: [Agent]!
+    createdAt: String!
+    updatedAt: String!
+}
+
+
+# ================================================================================#
+type Query{
+# ----------------------- Division --------------------------------------------#
+
+    divisions: [Division]!
+    findDivision(nom: String!): Division
+
+# ----------------------- End Division -----------------------------------------#
+
+# ----------------------- Compte --------------------------------------------#
+
+    comptes: [Compte]!
+    findCompte(email: String!): Compte
+    findCompteById(id: ID!): Compte
+
+# ----------------------- End Compte -----------------------------------------#
+
+# ----------------------- Type Conge -------------------------------------------#
+
+    typeConges: [TypeConge]!
+    findTypeConge(id: ID!): TypeConge
+
+# ----------------------- End Division ------------------------------------------#
+
+# ----------------------- Status -------------------------------------------#
+
+    status: [Status]!
+    findStatus(grade: String!): Status
+
+# ----------------------- End Status ------------------------------------------#
+
+# ----------------------- Calendrier -------------------------------------------#
+
+    calendriers: [Calendrier]!
+    findCalendrier(dateDebut: String!, dateFin: String!): Calendrier
+
+# ----------------------- End Calendrier ------------------------------------------#
+
+# ----------------------- AutorisationAbsence -------------------------------------------#
+
+    autorisationAbsence: [AutorisationAbsence]!
+    findAutorisationAbsence(id: ID!): AutorisationAbsence
+
+# ----------------------- End AutorisationAbsence ------------------------------------------#
+
+# ----------------------- Conge -------------------------------------------#
+
+    conges: [Conge]!
+    findConge(id: ID!): Conge!
+
+# ----------------------- End Conge ------------------------------------------#
+
+# ----------------------- TypeAbsence -------------------------------------------#
+
+    typeAbsences: [TypeAbsence]!
+    findTypeAbsence(nom: String!): TypeAbsence!
+
+# ----------------------- End TypeAbsence ------------------------------------------#
+
+# ----------------------- JourFerier -------------------------------------------#
+
+    jourFeriers: [JourFerier]!
+    findJourFerier(date: String!): JourFerier!
+
+# ----------------------- End JourFerier ------------------------------------------#
+
+# ----------------------- Agent -------------------------------------------#
+
+    agents: [Agent]!
+    findAgent(id: ID!): Agent!
+    findAgentByName(name: String!): Agent!
+
+
+# ----------------------- End Agent ------------------------------------------#
+}
+
+
+
+
+
+
+
+
+
+
+# ==============================================================================#
+
+type Mutation{
+
+# ----------------------- Division -----------------------------------------#
+    createDivision(nom: String!): Division!
+    updateDivision(id: ID!,input: DivisionInput!): String!
+    deleteDivision(id: ID!): String!
+
+# ----------------------- End Division --------------------------------------#
+
+# ----------------------- TypeConge -----------------------------------------#
+
+    createTypeConge(input: TypeCongeInput!): TypeConge!,
+    updateTypeConge(id: ID!,input: TypeCongeInput!): String!,
+    deleteTypeConge(id: ID!): String!
+
+# ----------------------- End TypeConge --------------------------------------#
+
+# ----------------------- Status -----------------------------------------#
+    initStatus: String
+    createStatus(grade: String!): Status!
+    updateStatus(id: ID!, grade: String!): String!
+    deleteStatus(id: ID!): String!
+
+# ----------------------- End Status --------------------------------------#
+
+# ----------------------- Compte -----------------------------------------#
+    createCompte(input: CompteInput!): Compte!
+    updateCompte(id: ID!, input: CompteInput!): String!
+    deleteCompte(id: ID!): String!
+
+# ----------------------- End Compte --------------------------------------#
+
+# ----------------------- Calendrier -----------------------------------------#
+    createCalendrier(input: CalendrierInput!): Calendrier!
+    updateCalendrier(id: ID!, input: CalendrierInput!): String!
+    deleteCalendrier(id: ID!): String!
+
+# ----------------------- End Calendrier --------------------------------------#
+
+# ----------------------- AutorisationAbsence -----------------------------------------#
+    createAutorisationAbsence(input: AutorisationAbsenceInput!): AutorisationAbsence!
+    updateAutorisationAbsence(id: ID!, input: AutorisationAbsenceInput!): String!
+    deleteAutorisationAbsence(id: ID!): String!
+
+# ----------------------- End AutorisationAbsence --------------------------------------#
+
+# ----------------------- Conge -----------------------------------------#
+    createConge(input: CongeInput!): Conge!
+    updateConge(id: ID!, input: CongeInput!): String!
+    deleteConge(id: ID!): String!
+
+# ----------------------- End Conge --------------------------------------#
+
+# ----------------------- TypeAbsence -----------------------------------------#
+    createTypeAbsence(input: TypeAbsenceInput!): TypeAbsence!
+    updateTypeAbsence(id: ID!, input: TypeAbsenceInput!): String!
+    deleteTypeAbsence(id: ID!): String!
+
+# ----------------------- End TypeAbsence --------------------------------------#
+
+# ----------------------- JourFerier -----------------------------------------#
+    createJourFerier(date: String!): JourFerier!
+    updateJourFerier(id: ID!, date: String!): String!
+    deleteJourFerier(id: ID!): String!
+
+# ----------------------- End JourFerier --------------------------------------#
+# ----------------------- Agent -----------------------------------------#
+    createAgent(input: AgentInput!): Agent!
+    updateAgent(id: ID!, input: AgentInput!): String!
+    deleteAgent(id: ID!): String!
+    setCalendrier(idAgent: ID! , idCalendrier: ID!): Agent!
+# ----------------------- End Agent --------------------------------------#
+
+}`);
+
+
+module.exports = Schema
