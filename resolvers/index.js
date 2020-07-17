@@ -6,6 +6,7 @@ const calendrierResolver = require('../resolvers/calendrierResolver');
 const agentResolver = require('../resolvers/agentResolver');
 const congeResolver = require('../resolvers/congeResolver');
 const autorisationAbsenceResolver = require('../resolvers/autorisationAbsenceResolver');
+const compteResolver = require('../resolvers/compteResolver');
 
 
 module.exports = {
@@ -17,4 +18,5 @@ module.exports = {
     ...agentResolver,
     ...congeResolver,
     ...autorisationAbsenceResolver,
+    ...compteResolver,
 }

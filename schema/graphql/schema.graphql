@@ -114,7 +114,12 @@ input CompteInput{
     email: String!
     isCountLock: Boolean!
     password: String!
-    agentId: ID!
+}
+
+type AuthInfo{
+    userId: ID!
+    token: String!
+    expirationToken: Int!
 }
 
 # ----------------------------  AutorisationAbsence Type   ------------------------------------------#
@@ -170,6 +175,8 @@ type JourFerier{
 }
 
 
+
+
 # ================================================================================#
 type Query{
 # ----------------------- Division --------------------------------------------#
@@ -184,6 +191,7 @@ type Query{
     comptes: [Compte]!
     findCompte(email: String!): Compte
     findCompteById(id: ID!): Compte
+    login(email: String! , password: String!): AuthInfo!
 
 # ----------------------- End Compte -----------------------------------------#
 

@@ -3,6 +3,7 @@ const Division = require("../schema/models/division")
 const Agent = require("../schema/models/agent")
 const Conge = require("../schema/models/conge")
 const typeAbsence = require("../schema/models/typeAbsence")
+// const Compte = require("../schema/models/compte")
 
 const transform = async division =>{
     let agentsTab  = []
@@ -179,6 +180,18 @@ const autorisationAbsenceTransform = async (autorisationAbsence) => {
     }
     
 }
+// fonction to transform compte 
+const compteTransform = async (compte) => {
+
+    return {
+        ...compte._doc,
+        Id: compte._doc._id,
+        agent: agentTransform(await Agent.findById(compte._doc.agent)),
+        createdAt: new Date(agent._doc.createdAt).toISOString(),
+        updatedAt: new Date(agent._doc.updatedAt).toISOString()
+    }
+    
+}
 
 
 module.exports = {
@@ -189,5 +202,6 @@ module.exports = {
     congeTransform,
     calendrierTransform,
     agentTransform,
-    autorisationAbsenceTransform
+    autorisationAbsenceTransform,
+    compteTransform
 }

@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
-
+const Division = require("./division");
+const Conge = require("./conge");
+const AutorisationAbsence = require("./autorizationAbsence");
 
 const agentSchema = new mongoose.Schema({
     nom: {
@@ -70,5 +72,14 @@ const agentSchema = new mongoose.Schema({
 
 }, { timestamps : true });
 
+agentSchema.pre("remove", async function(next){
+    try{
+        await Conge.remove({ "_id": { $in: this.conges}})
+        await AutorisationAbsence.remove({ "_id": { $in: this.autorisationAbsences}})
+        next();
+    }catch(err){ 
+        throw err;
+    }
+});
 
 module.exports = mongoose.model("Agent", agentSchema);

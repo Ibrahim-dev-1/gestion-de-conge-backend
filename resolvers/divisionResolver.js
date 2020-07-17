@@ -78,7 +78,7 @@ const Resolver = {
                 throw new Error("cette division est inconnu");
             }
 
-            await Div.deleteOne({ _id: id.trim() })
+            await Div.remove({_id: id.trim() })
             return "Suppression réussit ! ";
         }catch(err){
             throw err;
