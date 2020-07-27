@@ -4,12 +4,13 @@ const graphqlHTTP = require('express-graphql');
 const bodyParser = require('body-parser');
 const schema = require('./schema/graphql/schema.graphql');
 const resolvers = require('./resolvers/index');
-const Authorization = require("./middlewares/Authorization");
+const {originAuthorization , authAuthorization} = require('./middlewares/authentification');
 
 // creation de l'application express
 let app = express();
 
-app.use(Authorization);
+app.use(originAuthorization);
+app.use(authAuthorization);
 app.use(bodyParser.json());
 app.use('/api', graphqlHTTP({
     schema: schema,

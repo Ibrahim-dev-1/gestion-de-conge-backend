@@ -32,9 +32,11 @@ const Resolver = {
     } ,
 
     // create an status
-    createStatus: async ({ grade }) => {
+    createStatus: async ({ grade },req) => {
         try{
-        
+            if(!req.isAuth || !req.grade == "SUPERADMIN" || !req.grade == "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
             if(grade === undefined)
                 throw new Error("le grade ne doit pas etre vide")
             const g = grade.toUpperCase().trim();
@@ -52,8 +54,11 @@ const Resolver = {
     },
 
     // update status fonction
-    updateStatus: async({id, grade}) => {
+    updateStatus: async({id, grade} , req) => {
         try {
+            if(!req.isAuth || !req.grade == "SUPERADMIN" || !req.grade == "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
             const newStatus = {
                 grade: grade.trim()
             }
@@ -71,8 +76,11 @@ const Resolver = {
     },
 
     // delete status fonction
-    deleteStatus: async ({id}) => {
+    deleteStatus: async ({id}, req) => {
         try {
+            if(!req.isAuth || !req.grade == "SUPERADMIN" || !req.grade == "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
 
             if(!await Status.exists({_id: id.trim() })){
                 throw new Error("ce status est inconnu");

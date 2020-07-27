@@ -31,7 +31,7 @@ input AgentInput{
     fonction: String!
     situationMatrimoniale: String!
     sexe: String!
-    telephone: String!
+    telephone: String! 
     dateNaissance: String!
     dateEmbauche: String!
     statusId: ID!
@@ -119,6 +119,7 @@ input CompteInput{
 type AuthInfo{
     userId: ID!
     token: String!
+    grade: String!
     expirationToken: Int!
 }
 

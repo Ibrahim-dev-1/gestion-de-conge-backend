@@ -31,8 +31,11 @@ const Resolver = {
     } ,
 
     // create an typeAbsence
-    createTypeAbsence: async ({ input }) => {
+    createTypeAbsence: async ({ input }, req) => {
         try{
+            if(!req.isAuth || !req.grade == "SUPERADMIN" || !req.grade == "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
         
             if(input.nom === undefined || input.nbrJrMax === undefined )
                 throw new Error("le nom ou le nombre de jour maximum ne doit pas etre vide.")
@@ -50,8 +53,11 @@ const Resolver = {
     },
 
     // update type absence fonction
-    updateTypeAbsence: async({ id , input }) => {
+    updateTypeAbsence: async({ id , input }, req) => {
         try {
+            if(!req.isAuth || !req.grade == "SUPERADMIN" || !req.grade == "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
             const newTypeAbsence = {
                 nom: input.nom.trim(),
                 nbrJrMax: input.nbrJrMax
@@ -70,8 +76,12 @@ const Resolver = {
     },
 
     // delete type Absence fonction
-    deleteTypeAbsence: async ({id}) => {
+    deleteTypeAbsence: async ({id}, req) => {
         try {
+
+            if(!req.isAuth || !req.grade == "SUPERADMIN" || !req.grade == "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
 
             if(!await TypeAbsence.exists({_id: id.trim() })){
                 throw new Error("ce Type d' Absence est inconnu");

