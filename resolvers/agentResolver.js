@@ -8,13 +8,14 @@ const Resolver = {
     // get all agent
     agents: async ({}, req) => {
         try{
-        if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH" && req.grade !== "CHEF DIVISION")
-            throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ")
-        const result = await Agent.find();
-        const tableAgent = result.map( agent => {
-            return agentTransform(agent);
-        })
-        return tableAgent
+            if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH" && req.grade !== "CHEF DIVISION")
+                throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ")
+            
+            const result = await Agent.find();
+            const tableAgent = await result.map( agent => {
+                return agentTransform(agent);
+            })
+            return tableAgent
        }catch(err){
            throw err;
        }
@@ -30,7 +31,8 @@ const Resolver = {
                 throw new Error("le id ne doit pas etre vide")
             }
 
-            return agentTransform(await Agent.findById(id));
+            const ag = await Agent.findById(id);
+            return agentTransform(ag);
             
        }catch(err){
         throw err;
@@ -136,7 +138,7 @@ const Resolver = {
     deleteAgent: async ({id}, req) => {
         try {
 
-            if(!req.isAuth || req.grade !== "SUPERADMIN" || req.grade !== "GRH")
+            if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH")
                 throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
 
 

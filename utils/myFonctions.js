@@ -3,21 +3,26 @@ const Agent = require("../schema/models/agent")
 const Conge = require("../schema/models/conge")
 const typeAbsence = require("../schema/models/typeAbsence")
 
-const transform = async division =>{
+const transform =(division) =>{
+   
     let agentsTab  = []
 
-    if(division.agents){
+    if(division.agents.length > 0){
         agentsTab = division.agents.map(async agentId => {
-            const ag = await Agent.findById(agentId)
+            try {
+                const ag = await Agent.findById(agentId);
             
                 return {
                     ...ag._doc, 
                     Id: ag._doc._id , 
                     createdAt: new Date(ag._doc.createdAt).toDateString(),
                     updatedAt: new Date(ag._doc.updatedAt).toDateString()
-                } })            
+                }
+            } catch (error) {
+                throw error;
+            }    
+        })            
     }
-
     return {
         ...division._doc,
         Id: division._doc._id,
