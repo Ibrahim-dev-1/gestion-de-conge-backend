@@ -112,7 +112,7 @@ type Compte{
 
 input CompteInput{
     email: String!
-    isCountLock: Boolean!
+    isCountLock: Boolean
     password: String!
 }
 

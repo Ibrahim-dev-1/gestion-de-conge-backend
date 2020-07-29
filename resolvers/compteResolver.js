@@ -85,9 +85,8 @@ module.exports = {
 
     createCompte: async ({input}) => {
         try{
-            const email = input.email.trim();
-            const password = input.password.trim();
-            const isCountLock = input.isCountLock.trim();
+            const email = input.email;
+            const password = input.password;
 
             if(email === undefined)
                 throw new Error("l' Email ne doit pas etre vide")
@@ -101,8 +100,8 @@ module.exports = {
             if(await Compte.exists({email}))
                 throw new Error("ce Compte exists déja")
 
-            const passwordCrypter = bcrypt.hash(password, 13);
-            const newCompte = await new Compte({email,password: passwordCrypter, agent});
+            const passwordCrypter = await bcrypt.hash(password, 13);
+            const newCompte = await new Compte({email,password: passwordCrypter,isCountLock:false, agent});
             const resultSave = await newCompte.save();
             return compteTransform(resultSave);
 
@@ -116,7 +115,7 @@ module.exports = {
                 throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
 
 
-            if(!await Compte.exists({_id: id.trim()}) ){
+            if(!await Compte.exists({_id: id}) ){
                 throw new Error("ce compte est inconnu");
             }
             await Compte.remove({_id: id})
