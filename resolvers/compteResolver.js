@@ -101,7 +101,7 @@ module.exports = {
                 throw new Error("ce Compte exists déja")
 
             const passwordCrypter = await bcrypt.hash(password, 13);
-            const newCompte = await new Compte({email,password: passwordCrypter,isCountLock:false, agent});
+            const newCompte = await new Compte({email,password: passwordCrypter,isCountLock:false, agent:agent});
             const resultSave = await newCompte.save();
             return compteTransform(resultSave);
 

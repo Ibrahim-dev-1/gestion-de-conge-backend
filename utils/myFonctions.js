@@ -112,6 +112,8 @@ const calendrierTransform = calendrier =>{
     return {
         ...calendrier._doc,
         Id: calendrier._doc._id,
+        dateDebut: new Date(calendrier._doc.dateDebut).toDateString(),
+        dateFin: new Date(calendrier._doc.dateFin).toDateString(),
         createdAt: new Date(calendrier._doc.createdAt).toDateString(),
         updatedAt: new Date(calendrier._doc.updatedAt).toDateString()
     }
@@ -172,12 +174,12 @@ const agentTransform = async (agent) =>{
 
 // fonction to transform autorisation absence
 const autorisationAbsenceTransform = async (autorisationAbsence) => {
-
+    const agent = await Agent.findById(autorisationAbsence._doc.agent);
     return {
         ...autorisationAbsence._doc,
         Id: autorisationAbsence._doc._id,
-        agent: agentTransform(await Agent.findById(autorisationAbsence._doc.agent)),
-        typeAbsence : typeAbsenceTransform(await typeAbsence.findById(autorisationAbsence._doc.typeAbsence)),
+        agent,
+        typeAbsence : typeAbsenceTra*nsform(await typeAbsence.findById(autorisationAbsence._doc.typeAbsence)),
         createdAt: new Date(agent._doc.createdAt).toDateString(),
         updatedAt: new Date(agent._doc.updatedAt).toDateString()
     }
@@ -185,11 +187,12 @@ const autorisationAbsenceTransform = async (autorisationAbsence) => {
 }
 // fonction to transform compte 
 const compteTransform = async (compte) => {
+    const agent = await Agent.findById(compte._doc.agent);
 
     return {
         ...compte._doc,
         Id: compte._doc._id,
-        agent: agentTransform(await Agent.findById(compte._doc.agent)),
+        agent,
         createdAt: new Date(agent._doc.createdAt).toDateString(),
         updatedAt: new Date(agent._doc.updatedAt).toDateString()
     }

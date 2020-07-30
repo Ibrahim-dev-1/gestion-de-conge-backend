@@ -32,25 +32,28 @@ const Resolver = {
     } ,
 
     // create an conge
-    createConge: async ( {input} ) => {
+    createConge: async ( {input} , req) => {
         try{
             
+            if(!req.isAuth)
+                throw new Error("Veuillez vous connectez avant de continuez ");
+
             if(input.dateDebut === undefined ||
                 input.dateFin === undefined || 
                 input.commentaire === undefined || 
-                input.agentId === undefined ||
                 input.typeCongeId === undefined )
                 { 
                     throw new Error("vous devez remplire tous les champs")}
                 
             // find agent 
-            if(!await Agent.exists({_id: input.agentId}))
+            if(!await Agent.exists({email: req.email }))
                 throw new Error("cet agent n'exist pas ");
 
             if(!await TypeConge.exists({_id: input.typeCongeId }))
                 throw new Error("Ce type de conge n'exist pas ")
              
-            const agentObject = await Agent.findById(input.agentId);
+            const agentObject = await Agent.findOne({email: req.email});
+            console.log(agentObject);
             const typeCongeObject = await TypeConge.findById(input.typeCongeId);
 
             

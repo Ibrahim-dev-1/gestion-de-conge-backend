@@ -95,7 +95,6 @@ input CongeInput{
     dateDebut: String!
     dateFin: String!
     commentaire: String
-    agentId: ID!
     typeCongeId: ID!
 }
 
