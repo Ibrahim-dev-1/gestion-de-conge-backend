@@ -3,33 +3,34 @@ const Agent = require("../schema/models/agent")
 const Conge = require("../schema/models/conge")
 const typeAbsence = require("../schema/models/typeAbsence")
 
-const transform =(division) =>{
+const transform = async (division) =>{
    
-    let agentsTab  = []
+        let agentsTab  = []
 
-    if(division.agents.length > 0){
-        agentsTab = division.agents.map(async agentId => {
-            try {
-                const ag = await Agent.findById(agentId);
-            
-                return {
-                    ...ag._doc, 
-                    Id: ag._doc._id , 
-                    createdAt: new Date(ag._doc.createdAt).toDateString(),
-                    updatedAt: new Date(ag._doc.updatedAt).toDateString()
-                }
-            } catch (error) {
-                throw error;
-            }    
-        })            
-    }
-    return {
-        ...division._doc,
-        Id: division._doc._id,
-        agents: agentsTab,
-        createdAt: new Date(division._doc.createdAt).toDateString(),
-        updatedAt: new Date(division._doc.updatedAt).toDateString()
-    }
+        if(division.agents.length > 0){
+            agentsTab = division.agents.map(agentId => {
+                    Agent.findById(agentId)
+                    .then(function(ag){
+                        return {
+                            ...ag._doc, 
+                            Id: ag._doc._id , 
+                            createdAt: new Date(ag._doc.createdAt).toDateString(),
+                            updatedAt: new Date(ag._doc.updatedAt).toDateString()
+                        }
+                    }).catch(function(err){
+                        throw err;
+                    });
+                
+            })            
+        }
+        return {
+            ...division._doc,
+            Id: division._doc._id,
+            agents: agentsTab,
+            createdAt: new Date(division._doc.createdAt).toDateString(),
+            updatedAt: new Date(division._doc.updatedAt).toDateString()
+        }
+        
 }
 
 // fonction to transform status
@@ -71,7 +72,6 @@ const typeCongeTransform = typeConge =>{
                 updatedAt: new Date(cong._doc.updatedAt).toDateString()
             }
            }catch(err){
-               console.log(err);
                throw err
            }
         } )
@@ -97,14 +97,19 @@ const typeAbsenceTransform = typeAbsence =>{
 }
 // fonction to transform conge
 const congeTransform = async conge => {
-    // console.log(conge)
-    return {
-        ...conge._doc,
-        Id: conge._doc._id,
-        agent: agentTransform(await Agent.findById(conge._doc.agent)),
-        createdAt: new Date(conge._doc.createdAt).toDateString(),
-        updatedAt: new Date(conge._doc.updatedAt).toDateString()
-    }
+   try {
+        return {
+            ...conge._doc,
+            Id: conge._doc._id,
+            dateDebut: new Date(conge._doc.dateDebut).toDateString(),
+            dateFin: new Date(conge._doc.dateFin).toDateString(),
+            agent: agentTransform(await Agent.findById(conge._doc.agent)),
+            createdAt: new Date(conge._doc.createdAt).toDateString(),
+            updatedAt: new Date(conge._doc.updatedAt).toDateString()
+        }
+   } catch (error) {
+       throw errors;
+   }
 }
 
 // fonction to transform calendrier
@@ -136,7 +141,6 @@ const agentTransform = async (agent) =>{
                 updatedAt: new Date(cong._doc.updatedAt).toDateString()
             }
            }catch(err){
-               console.log(err);
                throw err
            }
         } )

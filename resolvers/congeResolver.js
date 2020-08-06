@@ -1,18 +1,33 @@
 const Conge = require('../schema/models/conge');
-const { congeTransform } = require('../utils/myFonctions');
+const { congeTransform, agentTransform } = require('../utils/myFonctions');
 const TypeConge = require('../schema/models/typeConge');
 const Agent = require('../schema/models/agent');
 const Calendrier = require('../schema/models/calendrier');
 
 const Resolver = {
     // get all conge
-    conges: async () => {
+    conges: async ({}, req) => {
        try{
-        const result = await Conge.find();
-        const tableConge = result.map( conge => {
-            return congeTransform(conge);
-        })
-        return tableConge
+            if(!req.isAuth || req.grade !== "GRH" && req.grade !== "SUPERADMIN")
+                throw new Error("Vous n'est pas authorizer . Veuillez contactez le GRH ou l'Administrateur")
+           
+            if(req.grade === "GRH") {
+                const r = await Conge.find({isChefAuthorized: true });
+                if(r.length > 0){
+
+                    return r.map( conge => {
+                        return congeTransform(conge);
+                    })
+                }
+                return [];
+            }
+
+            const result = await Conge.find();
+            if(result.length > 0){
+                return result.map( conge => {
+                    return congeTransform(conge);
+                })
+            }
        }catch(err){
            throw err;
        }
@@ -53,7 +68,6 @@ const Resolver = {
                 throw new Error("Ce type de conge n'exist pas ")
              
             const agentObject = await Agent.findOne({email: req.email});
-            console.log(agentObject);
             const typeCongeObject = await TypeConge.findById(input.typeCongeId);
 
             
@@ -63,7 +77,6 @@ const Resolver = {
             /********************************************** */
             if(agentObject._doc.calendrier === undefined)
             {
-                console.log(agentObject._doc.nom + " n'a pas de calendrier")
                 throw new Error("Vous n'etes pas dans un calendrier . Veuillez contact le GRH ou l'administrateur pour vous intégrer ")
             }
             const calendrierObjet = await Calendrier.findById(agentObject._doc.calendrier)
@@ -74,14 +87,18 @@ const Resolver = {
                 throw new Error("Votre date du debut du congé ne doit pas depasser votre date de fin de congé")
 
             /** if agent has calendar , then check if is in time */
-            if(new Date(calendrierObjet._doc.dateDebut) > new Date(input.dateDebut )
-                || new Date(calendrierObjet._doc.dateFin) < new Date(input.dateFin) ||
-                new Date().getFullYear() !== new Date(input.dateDebut).getFullYear()
-            )
-                {
-                    throw new Error("Vous devez demander un conge entre les dates: "+ 
-                    calendrierObjet._doc.dateDebut + " et " + calendrierObjet._doc.dateFin)
-                }
+            if(new Date(calendrierObjet._doc.dateDebut) > new Date(input.dateDebut ))
+                throw new Error("Votre date du debut n'est pas dans le calendrier fournis! : Vous devez demander un congé entre : " + calendrierObjet._doc.dateDebut + " et " + calendrierObjet._doc.dateFin);
+                
+            if(new Date(calendrierObjet._doc.dateFin) < new Date(input.dateFin))
+                throw new Error("Votre date de fin n'est pas dans le calendrier fournis! : Vous devez demander un congé entre : " + calendrierObjet._doc.dateDebut + " et " + calendrierObjet._doc.dateFin);
+
+            if(new Date().getFullYear() !== new Date(input.dateDebut).getFullYear() )
+                throw new Error("Votre date du Debut n'est pas dans l'année courrante !: Vous devez demander un congé entre : " + calendrierObjet._doc.dateDebut + " et " + calendrierObjet._doc.dateFin);
+
+            if(new Date().getMonth() > new Date(calendrierObjet._doc.dateFin).getMonth() )
+                throw new Error("Votre mois n'est pas valid par rapport au calendrier forunis!: Vous devez demander un congé entre : " + calendrierObjet._doc.dateDebut + " et " + calendrierObjet._doc.dateFin);
+
                 
             // check if this conge has been already taken
             if(await Conge.exists({ 
@@ -96,6 +113,8 @@ const Resolver = {
                 dateDebut: new Date(input.dateDebut),
                 dateFin: new Date(input.dateFin),
                 commentaire: input.commentaire,
+                isChefAuthorized: false,
+                status: "en Attente",
                 agent: agentObject,
                 typeConge: typeCongeObject
             }) 
@@ -109,9 +128,25 @@ const Resolver = {
             return congeTransform(resultConge);
 
             }catch(err){
-                console.log(err)
-           throw err;
-       }
+                throw err;
+            }
+    },
+    setChefAuthorization: async ({id,authorized}) => {
+        try {
+            if(id === undefined)
+                throw new Error("Veuillez fournir l'id du conge")
+            if(authorized === undefined)
+                throw new Error("Veillez fournir la valeur de l'authorization");
+            
+            const conge = await Conge.findById(id);
+            if(!conge)
+                throw new Error("Impossible de trouver ce conge ");
+            await conge.updateOne({ isChefAuthorized: authorized });
+            return "Authorization défini ";
+
+        } catch (error) {
+            throw error;
+        }
     },
 
     // update type absence fonction
@@ -129,10 +164,8 @@ const Resolver = {
                 typeConge: result._doc.typeConge,
                 agent: result._doc.agent,
             });
-            console.log(update)
             return id + " à été mise à jour avec succèss....";
         }catch(err){
-            console.log(err)
             throw err;
         }
     },
@@ -149,6 +182,60 @@ const Resolver = {
             return "Suppression réussit ! ";
         }catch(err){
             throw err;
+        }
+    },
+
+    // set status to conge 
+    setStatus: async ({id,name}) => {
+        try {
+            if(name === undefined)
+                throw new Error("Veuillez fournir un status au conge");
+            if(id === undefined)
+                throw new Error("Veuillez renseigner le conge que vous voulez modifier")
+
+            const conge = await Conge.findById(id);
+            if(!conge)
+                throw new Error("ce conge n'exist pas ");
+            
+            await conge.updateOne({status: name }); 
+
+            return "le status de la demande à été modifier avec success";
+
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    // find demande form chef division division
+    findDemandeForEachAgentByDivision: async ({},req) => {
+        try {
+            if(!req.isAuth || req.grade !== "CHEF DIVISION" && req.grade !== "GRH" && req.grade !== "SUPER ADMIN")
+                throw new Error("Vous n'etes pas autoriser à effectuer cette action" );
+
+            let tableauDemandeConge = [];
+            if(req.email === undefined)
+                throw new Error("Veuillez s'il vous plait renseigner l'email du chef de division ");
+            
+            const agentDiv =  await Agent.findOne({email: req.email});
+            if(!agentDiv)
+                throw new Error("Impossible de trouver cet agent ");
+            const listagentsDivision = await Agent.find({division: agentDiv.division._id });
+            if(!listagentsDivision)
+                throw new Error("Pas d'agent dans cette division");
+
+            const demandesConges = await Conge.find({
+                agent: {$in: listagentsDivision },
+                isChefAuthorized: false,
+            }) 
+            console.log(demandesConges);
+            if(demandesConges.length > 0){
+                tableauDemandeConge = demandesConges.map(function(demande){
+                    return congeTransform(demande);
+                })
+            }          
+            return tableauDemandeConge;
+        } catch (error) {
+            throw error;
         }
     },
 

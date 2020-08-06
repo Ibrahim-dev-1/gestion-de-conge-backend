@@ -5,6 +5,7 @@ const congeSchema = new mongoose.Schema({
     dateDebut: { type: String , required: true },
     dateFin: { type: String, required: true },
     commentaire: String,
+    status: String,
     typeConge:{
         type: mongoose.Types.ObjectId,
         rel: 'TypeConge'
@@ -12,8 +13,8 @@ const congeSchema = new mongoose.Schema({
     agent: {
         type: mongoose.Types.ObjectId,
         rel: 'Agent'
-    }
-
+    },
+    isChefAuthorized: Boolean,
 
 }, { timestamps : true });
 

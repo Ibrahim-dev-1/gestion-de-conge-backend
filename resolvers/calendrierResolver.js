@@ -1,5 +1,7 @@
 const Calendrier = require('../schema/models/calendrier');
 const { calendrierTransform } = require('../utils/myFonctions');
+const { findById } = require('../schema/models/calendrier');
+const Agent = require('../schema/models/agent');
 
 
 const Resolver = {
@@ -91,6 +93,37 @@ const Resolver = {
             throw err;
         }
     },
+
+    // add agents to calendrier
+    addAgents: async ({calendrierId, agents }, req) => {
+        try {
+            if(!req.isAuth)
+                throw new Error("Vous n'est pas connectez . veuillez vous connectez")
+            if(calendrierId === undefined || agents.length === 0)
+                throw new Error("Vous devez renseigner l'id du calendrier et la liste des agents");
+            
+            const calendrier = await Calendrier.findById(calendrierId);
+            if(!calendrier)
+                throw new Error("Cette calendrier est inconnue ou n'a pas encore été créée");
+
+            // mise à jour des agents avec le id du calendrier
+            if(agents.length > 0){
+                agents.map(function(agentElement){
+                    Agent.findById(agentElement).then(function(eachAgent){
+                        return eachAgent.updateOne({calendrier: calendrierId}).catch(function(err){throw err;})
+                    }).catch(function(err){
+                        throw err;
+                    });
+                   
+                })
+            }
+            const response = await calendrier.updateOne({agents:[...calendrier._doc.agents, ...agents]});
+            return "Ajout réuissit..";
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
 
 }
 

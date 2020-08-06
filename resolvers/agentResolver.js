@@ -11,6 +11,21 @@ const Resolver = {
             if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH" && req.grade !== "CHEF DIVISION")
                 throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ")
             
+            if(req.grade === "CHEF DIVISION")
+            {
+                const chef = await Agent.findOne({ email: req.email });
+                if(!chef)
+                    throw new Error("impossible de trouver un chef correspondant à cette adresse email ");
+
+                const ag = await Agent.find({ division: chef._doc.division });
+                if(ag.length > 0 ){
+
+                    return await ag.map( agent => {
+                        return agentTransform(agent);
+                    })
+                }
+            }    
+
             const result = await Agent.find();
             const tableAgent = await result.map( agent => {
                 return agentTransform(agent);
@@ -24,7 +39,7 @@ const Resolver = {
     // find one type Absence by nom function
     findAgent: async ({ id }, req) => {
        try{
-        if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH")
+        if(!req.isAuth || req.grade !== "SUPERADMIN" && req.grade !== "GRH" && req.grade !== "CHEF DIVISION")
             throw new Error("Vous n'avez pas l'autorisation sur cette action! Veuillez contactez votre GRH ou l'ADMINISTRATEUR ");
 
             if(id === undefined){
@@ -35,7 +50,7 @@ const Resolver = {
             return agentTransform(ag);
             
        }catch(err){
-        throw err;
+            throw err;
         }
     } ,
 
@@ -126,7 +141,6 @@ const Resolver = {
                 status: StatusObject,
                 division: DivisionObject
             });
-            console.log(update)
             return id + " à été mise à jour avec succèss....";
         }catch(err){
             console.log(err)
@@ -181,7 +195,6 @@ const Resolver = {
             return agentTransform(age);
 
             }catch(err){
-            console.log(err)
             throw err;
         }
     },

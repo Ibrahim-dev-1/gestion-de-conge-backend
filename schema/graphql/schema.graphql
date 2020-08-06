@@ -87,6 +87,8 @@ type Conge{
     commentaire: String!
     typeConge: TypeConge!
     agent: Agent!
+    status: String!
+    isChefAuthorized: Boolean!
     createdAt: String!
     updatedAt: String! 
 }
@@ -199,6 +201,7 @@ type Query{
 
     typeConges: [TypeConge]!
     findTypeConge(id: ID!): TypeConge
+    findDemandeForEachAgentByDivision: [Conge]!
 
 # ----------------------- End Division ------------------------------------------#
 
@@ -279,6 +282,7 @@ type Mutation{
     createTypeConge(input: TypeCongeInput!): TypeConge!,
     updateTypeConge(id: ID!,input: TypeCongeInput!): String!,
     deleteTypeConge(id: ID!): String!
+    
 
 # ----------------------- End TypeConge --------------------------------------#
 
@@ -301,6 +305,7 @@ type Mutation{
     createCalendrier(input: CalendrierInput!): Calendrier!
     updateCalendrier(id: ID!, input: CalendrierInput!): String!
     deleteCalendrier(id: ID!): String!
+    addAgents(calendrierId: ID! , agents:[ID]!): String!
 
 # ----------------------- End Calendrier --------------------------------------#
 
@@ -315,6 +320,8 @@ type Mutation{
     createConge(input: CongeInput!): Conge!
     updateConge(id: ID!, input: CongeInput!): String!
     deleteConge(id: ID!): String!
+    setStatus(id: ID!, name: String!): String!
+    setChefAuthorization(id: ID! , authorized: Boolean!): String!
 
 # ----------------------- End Conge --------------------------------------#
 
