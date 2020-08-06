@@ -31,7 +31,7 @@ const Resolver = {
     } ,
 
     // create an AutorisationAbsence
-    createAutorisationAbsence: async ( {input} ) => {
+    createAutorisationAbsence: async ({ input }) => {
         try{
             let myCommentaire = input.commentaire;
             

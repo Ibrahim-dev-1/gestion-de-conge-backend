@@ -8,18 +8,21 @@ const transform = async (division) =>{
         let agentsTab  = []
 
         if(division.agents.length > 0){
-            agentsTab = division.agents.map(agentId => {
-                    Agent.findById(agentId)
-                    .then(function(ag){
-                        return {
+            agentsTab = division.agents.map( async agentId => {
+                try {
+                    const ag = await Agent.findById(agentId);
+                    if(!ag)
+                        throw new Error("impossible de trouver un agent ");
+                    console.log("trouver un agent nommer: " + ag.nom );
+                    return {
                             ...ag._doc, 
                             Id: ag._doc._id , 
                             createdAt: new Date(ag._doc.createdAt).toDateString(),
                             updatedAt: new Date(ag._doc.updatedAt).toDateString()
                         }
-                    }).catch(function(err){
-                        throw err;
-                    });
+                } catch (error) {
+                    return console.log(error.message );
+                }
                 
             })            
         }
@@ -130,18 +133,21 @@ const agentTransform = async (agent) =>{
     let congeTab = [];
     let autorisationTab = [];
 
-    if(agent._doc.conges){
-        congeTab = agent._doc.conges.map( async congeId => {
+    if(agent.conges){
+        congeTab = agent.conges.map( async congeId => {
            try{
-            const cong = await Conge.findById(congeId);
-            return {
-                ...cong._doc,
-                Id: cong._doc._id,
-                createdAt: new Date(cong._doc.createdAt).toDateString(),
-                updatedAt: new Date(cong._doc.updatedAt).toDateString()
-            }
+                const cong = await Conge.findById(congeId);
+                if(!cong)
+                    throw new Error("impossible de trouver un congé avec cette adresse email");
+
+                return {
+                    ...cong._doc,
+                    Id: cong._id,
+                    createdAt: new Date(cong._doc.createdAt).toDateString(),
+                    updatedAt: new Date(cong._doc.updatedAt).toDateString()
+                }
            }catch(err){
-               throw err
+               return console.log(err.message);
            }
         } )
         
